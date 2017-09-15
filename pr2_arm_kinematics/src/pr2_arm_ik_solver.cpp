@@ -55,7 +55,7 @@ PR2ArmIKSolver::PR2ArmIKSolver(const urdf::Model &robot_model,
     active_ = true;
 }
 
-void PR2ArmIKSolver::getSolverInfo(moveit_msgs::KinematicSolverInfo &response)
+void PR2ArmIKSolver::getSolverInfo(pr2_arm_kinematics::KinematicSolverInfo &response)
 {
   pr2_arm_ik_->getSolverInfo(response);
 }

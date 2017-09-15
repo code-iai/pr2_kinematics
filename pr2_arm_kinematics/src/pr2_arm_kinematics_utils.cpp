@@ -234,7 +234,7 @@ bool solveCosineEqn(const double &a, const double &b, const double &c, double &s
 
 
 bool checkJointNames(const std::vector<std::string> &joint_names,
-                     const moveit_msgs::KinematicSolverInfo &chain_info)
+                     const pr2_arm_kinematics::KinematicSolverInfo &chain_info)
 {
   for(unsigned int i=0; i < chain_info.joint_names.size(); i++)
   {
@@ -257,7 +257,7 @@ bool checkJointNames(const std::vector<std::string> &joint_names,
 }
 
 bool checkLinkNames(const std::vector<std::string> &link_names,
-                    const moveit_msgs::KinematicSolverInfo &chain_info)
+                    const pr2_arm_kinematics::KinematicSolverInfo &chain_info)
 {
   if(link_names.empty())
     return false;
@@ -270,7 +270,7 @@ bool checkLinkNames(const std::vector<std::string> &link_names,
 }
 
 bool checkLinkName(const std::string &link_name,
-                   const moveit_msgs::KinematicSolverInfo &chain_info)
+                   const pr2_arm_kinematics::KinematicSolverInfo &chain_info)
 {
   for(unsigned int i=0; i < chain_info.link_names.size(); i++)
   {
@@ -281,7 +281,7 @@ bool checkLinkName(const std::string &link_name,
 }
 
 bool checkRobotState(moveit_msgs::RobotState &robot_state,
-                     const moveit_msgs::KinematicSolverInfo &chain_info)
+                     const pr2_arm_kinematics::KinematicSolverInfo &chain_info)
 {
   if((int) robot_state.joint_state.position.size() != (int) robot_state.joint_state.name.size())
   {
@@ -298,7 +298,7 @@ bool checkRobotState(moveit_msgs::RobotState &robot_state,
 
 bool checkFKService(moveit_msgs::GetPositionFK::Request &request,
                     moveit_msgs::GetPositionFK::Response &response,
-                    const moveit_msgs::KinematicSolverInfo &chain_info)
+                    const pr2_arm_kinematics::KinematicSolverInfo &chain_info)
 {
   if(!checkLinkNames(request.fk_link_names,chain_info))
   {
@@ -316,7 +316,7 @@ bool checkFKService(moveit_msgs::GetPositionFK::Request &request,
 
 bool checkIKService(moveit_msgs::GetPositionIK::Request &request,
                     moveit_msgs::GetPositionIK::Response &response,
-                    const moveit_msgs::KinematicSolverInfo &chain_info)
+                    const pr2_arm_kinematics::KinematicSolverInfo &chain_info)
 {
   if(!checkLinkName(request.ik_request.ik_link_name,chain_info))
   {
@@ -394,7 +394,7 @@ bool convertPoseToRootFrame(const geometry_msgs::PoseStamped &pose_msg,
 
 
 int getJointIndex(const std::string &name,
-                  const moveit_msgs::KinematicSolverInfo &chain_info)
+                  const pr2_arm_kinematics::KinematicSolverInfo &chain_info)
 {
   for(unsigned int i=0; i < chain_info.joint_names.size(); i++)
   {
@@ -407,7 +407,7 @@ int getJointIndex(const std::string &name,
 }
 
 void getKDLChainInfo(const KDL::Chain &chain,
-                     moveit_msgs::KinematicSolverInfo &chain_info)
+                     pr2_arm_kinematics::KinematicSolverInfo &chain_info)
 {
   int i=0; // segment number
   while(i < (int)chain.getNrOfSegments())

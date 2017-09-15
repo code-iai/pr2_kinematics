@@ -47,7 +47,7 @@
 
 #include <moveit_msgs/GetPositionFK.h>
 #include <moveit_msgs/GetPositionIK.h>
-#include <moveit_msgs/GetKinematicSolverInfo.h>
+#include <pr2_arm_kinematics/GetKinematicSolverInfo.h>
 #include <moveit_msgs/MoveItErrorCodes.h>
 
 #include <kdl/chainfksolverpos_recursive.hpp>
@@ -149,7 +149,7 @@ protected:
   int dimension_;
   boost::shared_ptr<KDL::ChainFkSolverPos_recursive> jnt_to_pose_solver_;
   KDL::Chain kdl_chain_;
-  moveit_msgs::KinematicSolverInfo ik_solver_info_, fk_solver_info_;
+  pr2_arm_kinematics::KinematicSolverInfo ik_solver_info_, fk_solver_info_;
 
 };
 }

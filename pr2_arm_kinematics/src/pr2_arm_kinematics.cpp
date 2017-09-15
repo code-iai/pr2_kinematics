@@ -227,8 +227,8 @@ bool PR2ArmKinematics::getPositionIKHelper(moveit_msgs::GetPositionIK::Request &
   }
 }
 
-bool PR2ArmKinematics::getIKSolverInfo(moveit_msgs::GetKinematicSolverInfo::Request &request,
-                                       moveit_msgs::GetKinematicSolverInfo::Response &response)
+bool PR2ArmKinematics::getIKSolverInfo(pr2_arm_kinematics::GetKinematicSolverInfo::Request &request,
+                                       pr2_arm_kinematics::GetKinematicSolverInfo::Response &response)
 {
   if (active_)
   {
@@ -239,8 +239,8 @@ bool PR2ArmKinematics::getIKSolverInfo(moveit_msgs::GetKinematicSolverInfo::Requ
   return false;
 }
 
-bool PR2ArmKinematics::getFKSolverInfo(moveit_msgs::GetKinematicSolverInfo::Request &request,
-                                       moveit_msgs::GetKinematicSolverInfo::Response &response)
+bool PR2ArmKinematics::getFKSolverInfo(pr2_arm_kinematics::GetKinematicSolverInfo::Request &request,
+                                       pr2_arm_kinematics::GetKinematicSolverInfo::Response &response)
 {
   if(active_)
   {

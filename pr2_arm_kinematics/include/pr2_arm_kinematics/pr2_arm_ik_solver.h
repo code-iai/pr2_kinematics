@@ -43,7 +43,7 @@
 #include <pr2_arm_kinematics/pr2_arm_ik.h>
 #include <moveit/kinematics_base/kinematics_base.h>
 #include <pr2_arm_kinematics/pr2_arm_kinematics_utils.h>
-#include <moveit_msgs/GetKinematicSolverInfo.h>
+#include <pr2_arm_kinematics/GetKinematicSolverInfo.h>
 #include <moveit_msgs/PositionIKRequest.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <tf_conversions/tf_kdl.h>
@@ -215,7 +215,7 @@ static const int TIMED_OUT = -2;
      * @param response This class gets populated with information about the joints
      * that IK operates on, including joint names and limits.
     */
-    void getSolverInfo(moveit_msgs::KinematicSolverInfo &response);
+    void getSolverInfo(pr2_arm_kinematics::KinematicSolverInfo &response);
 
     std::string getFrameId();
 

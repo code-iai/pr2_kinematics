@@ -47,7 +47,7 @@
 
 #include <moveit_msgs/GetPositionFK.h>
 #include <moveit_msgs/GetPositionIK.h>
-#include <moveit_msgs/GetKinematicSolverInfo.h>
+#include <pr2_arm_kinematics/GetKinematicSolverInfo.h>
 #include <moveit_msgs/MoveItErrorCodes.h>
 
 #include <kdl/chainfksolverpos_recursive.hpp>
@@ -93,16 +93,16 @@ namespace pr2_arm_kinematics
      * @param A request message. See service definition for GetKinematicSolverInfo for more information on this message.
      * @param The response message. See service definition for GetKinematicSolverInfo for more information on this message.
      */
-    bool getIKSolverInfo(moveit_msgs::GetKinematicSolverInfo::Request &request,
-                         moveit_msgs::GetKinematicSolverInfo::Response &response);
+    bool getIKSolverInfo(pr2_arm_kinematics::GetKinematicSolverInfo::Request &request,
+                         pr2_arm_kinematics::GetKinematicSolverInfo::Response &response);
 
     /**
      * @brief This is the basic kinematics info service that will return information about the kinematics node.
      * @param A request message. See service definition for GetKinematicSolverInfo for more information on this message.
      * @param The response message. See service definition for GetKinematicSolverInfo for more information on this message.
      */
-    bool getFKSolverInfo(moveit_msgs::GetKinematicSolverInfo::Request &request,
-                         moveit_msgs::GetKinematicSolverInfo::Response &response);
+    bool getFKSolverInfo(pr2_arm_kinematics::GetKinematicSolverInfo::Request &request,
+                         pr2_arm_kinematics::GetKinematicSolverInfo::Response &response);
 
     /**
      * @brief This is the basic forward kinematics service that will return information about the kinematics node.
@@ -134,7 +134,7 @@ namespace pr2_arm_kinematics
     int dimension_;
     boost::shared_ptr<KDL::ChainFkSolverPos_recursive> jnt_to_pose_solver_;
     KDL::Chain kdl_chain_;
-    moveit_msgs::KinematicSolverInfo ik_solver_info_, fk_solver_info_;
+    pr2_arm_kinematics::KinematicSolverInfo ik_solver_info_, fk_solver_info_;
   };
 }
 

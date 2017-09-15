@@ -4,9 +4,12 @@ cmake_minimum_required(VERSION 2.8.3)
 project(pr2_arm_kinematics)
 set(CMAKE_CXX_FLAGS "-std=c++11")
 find_package(Boost REQUIRED thread)
-find_package(catkin REQUIRED COMPONENTS roscpp angles tf_conversions urdf geometry_msgs kdl_parser moveit_msgs moveit_core pluginlib cmake_modules)
+find_package(catkin REQUIRED COMPONENTS roscpp angles tf_conversions urdf geometry_msgs kdl_parser moveit_msgs moveit_core pluginlib cmake_modules std_msgs message_generation)
 find_package(Eigen REQUIRED)
 
+add_message_files(DIRECTORY msg FILES KinematicSolverInfo.msg)
+add_service_files(DIRECTORY srv FILES GetKinematicSolverInfo.srv)
+generate_messages(DEPENDENCIES std_msgs moveit_msgs)
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
@@ -15,7 +18,7 @@ include_directories(${Boost_INCLUDE_DIRS})
  
 catkin_package(
     DEPENDS roscpp angles tf_conversions urdf geometry_msgs kdl_parser moveit_msgs pluginlib eigen moveit_core
-    CATKIN_DEPENDS # TODO
+    CATKIN_DEPENDS message_runtime # TODO
     INCLUDE_DIRS include# TODO include
     LIBRARIES pr2_arm_kinematics_lib# TODO
 )
@@ -30,7 +33,10 @@ add_library(pr2_arm_kinematics_lib
 
 add_executable(pr2_arm_kinematics_node src/main.cpp)
 target_link_libraries(pr2_arm_kinematics_node pr2_arm_kinematics_lib ${catkin_LIBRARIES})
+add_dependencies(pr2_arm_kinematics_node pr2_arm_kinematics_generate_messages_cpp)
+
 target_link_libraries(pr2_arm_kinematics_lib ${catkin_LIBRARIES})
+add_dependencies(pr2_arm_kinematics_lib pr2_arm_kinematics_generate_messages_cpp)
 
 install(FILES test_pr2_arm_ik.xml test_pr2_arm_ik_node.xml kinematics_plugins.xml
 DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
