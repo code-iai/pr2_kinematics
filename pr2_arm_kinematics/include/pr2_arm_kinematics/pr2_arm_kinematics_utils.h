@@ -37,7 +37,7 @@
 #ifndef MOVEIT_PR2_ARM_IK_UTILS_
 #define MOVEIT_PR2_ARM_IK_UTILS_
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <vector>
 #include <angles/angles.h>
 #include <Eigen/Core>
@@ -46,13 +46,15 @@
 #include <kdl/tree.hpp>
 #include <urdf/model.h>
 #include <kdl_parser/kdl_parser.hpp>
-#include <tf/tf.h>
-#include <tf/transform_listener.h>
-#include <tf_conversions/tf_kdl.h>
 
-#include <moveit_msgs/GetPositionFK.h>
-#include <moveit_msgs/GetPositionIK.h>
-#include <moveit_msgs/KinematicSolverInfo.h>
+
+#include <tf2_ros/transform_listener.h>
+
+#include <std_msgs/msg/string.h>
+#include <moveit_msgs/msg/display_trajectory.hpp>
+#include <moveit_msgs/srv/get_position_fk.h>
+#include <moveit_msgs/srv/get_position_ik.h>
+#include <moveit_msgs/msg/kinematic_solver_info.h>
 
 
 using namespace angles;
@@ -80,7 +82,7 @@ namespace pr2_arm_kinematics
                       double &soln1,
                       double &soln2);
 
-  bool loadRobotModel(ros::NodeHandle node_handle,
+  bool loadRobotModel(rclcpp::NodeHandle node_handle,
                       urdf::Model &robot_model,
                       std::string &xml_string);
 

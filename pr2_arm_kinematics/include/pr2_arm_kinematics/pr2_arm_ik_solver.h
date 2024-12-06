@@ -43,9 +43,8 @@
 #include <pr2_arm_kinematics/pr2_arm_ik.h>
 #include <moveit/kinematics_base/kinematics_base.h>
 #include <pr2_arm_kinematics/pr2_arm_kinematics_utils.h>
-#include <moveit_msgs/PositionIKRequest.h>
-#include <geometry_msgs/PoseStamped.h>
-#include <tf_conversions/tf_kdl.h>
+#include <moveit_msgs/msg/position_ik_request.h>
+#include <geometry_msgs/msg/pose_stamped.h>
 
 namespace pr2_arm_kinematics
 {
