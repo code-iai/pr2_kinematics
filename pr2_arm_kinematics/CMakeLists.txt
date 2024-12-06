@@ -1,55 +1,60 @@
-# Catkin User Guide: http://www.ros.org/doc/groovy/api/catkin/html/user_guide/user_guide.html
-# Catkin CMake Standard: http://www.ros.org/doc/groovy/api/catkin/html/user_guide/standards.html
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.10)
 project(pr2_arm_kinematics)
 
-find_package(Boost REQUIRED thread)
-find_package(catkin REQUIRED COMPONENTS roscpp angles tf_conversions urdf geometry_msgs kdl_parser moveit_msgs moveit_core pluginlib cmake_modules)
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
+find_package(rclcpp_components REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(angles REQUIRED)
+find_package(urdf REQUIRED)
 find_package(Eigen3 REQUIRED)
-
-
-include_directories(include ${catkin_INCLUDE_DIRS})
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-include_directories(${EIGEN_INCLUDE_DIRS})
-include_directories(${Boost_INCLUDE_DIRS})
-
-catkin_package(
-    DEPENDS EIGEN3
-    CATKIN_DEPENDS roscpp angles tf_conversions urdf geometry_msgs kdl_parser moveit_msgs pluginlib moveit_kinematics
-    INCLUDE_DIRS include
-    LIBRARIES pr2_arm_kinematics_lib
-)
-
-add_library(pr2_arm_kinematics_lib
-  src/pr2_arm_ik.cpp
-  src/pr2_arm_ik_solver.cpp
-  src/pr2_arm_kinematics_utils.cpp
-  src/pr2_arm_kinematics.cpp
-  src/pr2_arm_kinematics_plugin.cpp
-)
+find_package(kdl_parser REQUIRED)
+find_package(moveit_msgs REQUIRED)
+find_package(moveit_core REQUIRED)
+find_package(std_msgs REQUIRED)
+#find_package(moveit_srvs REQUIRED)
+# uncomment the following section in order to fill in
+# further dependencies manually.
+# find_package(<dependency> REQUIRED)
 
 add_executable(pr2_arm_kinematics_node src/main.cpp)
-target_link_libraries(pr2_arm_kinematics_node pr2_arm_kinematics_lib ${catkin_LIBRARIES})
-target_link_libraries(pr2_arm_kinematics_lib ${catkin_LIBRARIES})
+target_include_directories(pr2_arm_kinematics_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
+target_compile_features(pr2_arm_kinematics_node PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 
-install(FILES test_pr2_arm_ik.xml test_pr2_arm_ik_node.xml kinematics_plugins.xml
-DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-
-install(DIRECTORY launch/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
-  PATTERN ".svn" EXCLUDE)
-
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  PATTERN ".svn" EXCLUDE
-)
-
-install(TARGETS pr2_arm_kinematics_lib
-ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+ament_target_dependencies(pr2_arm_kinematics_node
+    rclcpp
+    tf2_ros
+    angles
+    urdf
+    kdl_parser
+    moveit_msgs
+    moveit_core
+    std_msgs
+  #  moveit_srvs
+    )
+target_link_libraries(pr2_arm_kinematics_node Eigen3::Eigen)
 
 install(TARGETS pr2_arm_kinematics_node
-ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+  DESTINATION lib/${PROJECT_NAME})
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  # the following line skips the linter which checks for copyrights
+  # comment the line when a copyright and license is added to all source files
+  set(ament_cmake_copyright_FOUND TRUE)
+  # the following line skips cpplint (only works in a git repo)
+  # comment the line when this package is in a git repo and when
+  # a copyright and license is added to all source files
+  set(ament_cmake_cpplint_FOUND TRUE)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
+ament_package()
