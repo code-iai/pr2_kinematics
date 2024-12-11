@@ -35,10 +35,10 @@
 /* Author: Sachin Chitta */
 
 #include <pr2_arm_kinematics/pr2_arm_kinematics_plugin.h>
-#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/msg/pose_stamped.hpp>
 #include <kdl_parser/kdl_parser.hpp>
-#include <tf_conversions/tf_kdl.h>
-#include <ros/ros.h>
+//#include <tf_conversions/tf_kdl.h>
+//#include <ros/ros.h>
 #include <algorithm>
 #include <numeric>
 

@@ -40,19 +40,19 @@
 namespace pr2_arm_kinematics
 {
 static const double IK_DEFAULT_TIMEOUT = 10.0;
-bool loadRobotModel(ros::NodeHandle node_handle, urdf::Model &robot_model, std::string &xml_string)
+bool loadRobotModel(rclcpp::Node node_handle, urdf::Model &robot_model, std::string &xml_string)
 {
   std::string urdf_xml,full_urdf_xml;
-  node_handle.param("urdf_xml",urdf_xml,std::string("robot_description"));
-  node_handle.searchParam(urdf_xml,full_urdf_xml);
-  TiXmlDocument xml;
-  ROS_DEBUG("Reading xml file from parameter server\n");
+  node_handle.get_parameter("urdf_xml",std::string("robot_description"));
+  node_handle.search_parameter(urdf_xml,full_urdf_xml);
+  tinyxml::TiXmlDocument xml;
+  RCLCPP_DEBUG(node_handle.get_logger(), "Reading xml file from parameter server\n");
   std::string result;
-  if (node_handle.getParam(full_urdf_xml, result))
+  if (node_handle.get_parameter(full_urdf_xml, result))
     xml.Parse(result.c_str());
   else
   {
-    ROS_FATAL("Could not load the xml from parameter server: %s\n", urdf_xml.c_str());
+    ROS_FATAL(node_handle.get_logger(), "Could not load the xml from parameter server: %s\n", urdf_xml.c_str());
     return false;
   }
   xml_string = result;
@@ -60,36 +60,36 @@ bool loadRobotModel(ros::NodeHandle node_handle, urdf::Model &robot_model, std::
   TiXmlElement *root = xml.FirstChildElement("robot");
   if (!root || !root_element)
   {
-    ROS_FATAL("Could not parse the xml from %s\n", urdf_xml.c_str());
+    RCLCPP_FATAL(node_handle.get_logger(), "Could not parse the xml from %s\n", urdf_xml.c_str());
     exit(1);
   }
   robot_model.initXml(root);
   return true;
 }
 
-bool getKDLChain(const std::string &xml_string, const std::string &root_name, const std::string &tip_name, KDL::Chain &kdl_chain)
+bool getKDLChain(const std::string &xml_string, const std::string &root_name, const std::string &tip_name, KDL::Chain &kdl_chain, rclcpp::Node node_handle)
 {
   // create robot chain from root to tip
   KDL::Tree tree;
   if (!kdl_parser::treeFromString(xml_string, tree))
   {
-    ROS_ERROR("Could not initialize tree object");
+    RCLCPP_ERROR(node_handle.get_logger(), "Could not initialize tree object");
     return false;
   }
   if (!tree.getChain(root_name, tip_name, kdl_chain))
   {
-    ROS_ERROR_STREAM("Could not initialize chain object for base " << root_name << " tip " << tip_name);
+    RCLCPP_ERROR_STREAM(node_handle.get_logger(), "Could not initialize chain object for base " << root_name << " tip " << tip_name);
     return false;
   }
   return true;
 }
 
-bool getKDLTree(const std::string &xml_string, const std::string &root_name, const std::string &tip_name, KDL::Tree &kdl_tree)
+bool getKDLTree(const std::string &xml_string, const std::string &root_name, const std::string &tip_name, KDL::Tree &kdl_tree, rclcpp::Node node_handle)
 {
   // create robot chain from root to tip
   if (!kdl_parser::treeFromString(xml_string, kdl_tree))
   {
-    ROS_ERROR("Could not initialize tree object");
+    RCLCPP_ERROR(node_handle.get_logger(), "Could not initialize tree object");
     return false;
   }
   return true;
@@ -234,7 +234,7 @@ bool solveCosineEqn(const double &a, const double &b, const double &c, double &s
 
 
 bool checkJointNames(const std::vector<std::string> &joint_names,
-                     const moveit_msgs::KinematicSolverInfo &chain_info)
+                     const moveit_msgs::msg::KinematicSolverInfo &chain_info, rclcpp::Node node_handle)
 {
   for(unsigned int i=0; i < chain_info.joint_names.size(); i++)
   {
@@ -249,7 +249,7 @@ bool checkJointNames(const std::vector<std::string> &joint_names,
     }
     if(index < 0)
     {
-      ROS_ERROR("Joint state does not contain joint state for %s.",chain_info.joint_names[i].c_str());
+      RCLCPP_ERROR(node_handle.get_logger(), "Joint state does not contain joint state for %s.",chain_info.joint_names[i].c_str());
       return false;
     }
   }
@@ -257,7 +257,7 @@ bool checkJointNames(const std::vector<std::string> &joint_names,
 }
 
 bool checkLinkNames(const std::vector<std::string> &link_names,
-                    const moveit_msgs::KinematicSolverInfo &chain_info)
+                    const moveit_msgs::msg::KinematicSolverInfo &chain_info)
 {
   if(link_names.empty())
     return false;
@@ -270,7 +270,7 @@ bool checkLinkNames(const std::vector<std::string> &link_names,
 }
 
 bool checkLinkName(const std::string &link_name,
-                   const moveit_msgs::KinematicSolverInfo &chain_info)
+                   const moveit_msgs::msg::KinematicSolverInfo &chain_info)
 {
   for(unsigned int i=0; i < chain_info.link_names.size(); i++)
   {
@@ -280,29 +280,29 @@ bool checkLinkName(const std::string &link_name,
   return false;
 }
 
-bool checkRobotState(moveit_msgs::RobotState &robot_state,
-                     const moveit_msgs::KinematicSolverInfo &chain_info)
+bool checkRobotState(moveit_msgs::msg::RobotState &robot_state,
+                     const moveit_msgs::msg::KinematicSolverInfo &chain_info, rclcpp::Node node_handle)
 {
   if((int) robot_state.joint_state.position.size() != (int) robot_state.joint_state.name.size())
   {
-    ROS_ERROR("Number of joints in robot_state.joint_state does not match number of positions in robot_state.joint_state");
+    RCLCPP_ERROR(node_handle.get_logger(), "Number of joints in robot_state.joint_state does not match number of positions in robot_state.joint_state");
     return false;
   }
   if(!checkJointNames(robot_state.joint_state.name,chain_info))
   {
-    ROS_ERROR("Robot state must contain joint state for every joint in the kinematic chain");
+    RCLCPP_ERROR(node_handle.get_logger(), "Robot state must contain joint state for every joint in the kinematic chain");
     return false;
   }
   return true;
 }
 
-bool checkFKService(moveit_msgs::GetPositionFK::Request &request,
-                    moveit_msgs::GetPositionFK::Response &response,
-                    const moveit_msgs::KinematicSolverInfo &chain_info)
+bool checkFKService(moveit_msgs::srv::GetPositionFK::Request &request,
+                    moveit_msgs::srv::GetPositionFK::Response &response,
+                    const moveit_msgs::msg::KinematicSolverInfo &chain_info, rclcpp::Node node_handle)
 {
   if(!checkLinkNames(request.fk_link_names,chain_info))
   {
-    ROS_ERROR("Link name in service request does not match links that kinematics can provide solutions for.");
+    RCLCPP_ERROR(node_handle.get_logger(), "Link name in service request does not match links that kinematics can provide solutions for.");
     response.error_code.val = response.error_code.INVALID_LINK_NAME;
     return false;
   }
@@ -314,13 +314,13 @@ bool checkFKService(moveit_msgs::GetPositionFK::Request &request,
   return true;
 }
 
-bool checkIKService(moveit_msgs::GetPositionIK::Request &request,
-                    moveit_msgs::GetPositionIK::Response &response,
-                    const moveit_msgs::KinematicSolverInfo &chain_info)
+bool checkIKService(moveit_msgs::srv::GetPositionIK::Request &request,
+                    moveit_msgs::srv::GetPositionIK::Response &response,
+                    const moveit_msgs::msg::KinematicSolverInfo &chain_info, rclcpp::Node node_handle)
 {
   if(!checkLinkName(request.ik_request.ik_link_name,chain_info))
   {
-    ROS_ERROR("Link name in service request does not match links that kinematics can provide solutions for.");
+    RCLCPP_ERROR(node_handle.get_logger(), "Link name in service request does not match links that kinematics can provide solutions for.");
     response.error_code.val = response.error_code.INVALID_LINK_NAME;
     return false;
   }
@@ -337,12 +337,12 @@ bool checkIKService(moveit_msgs::GetPositionIK::Request &request,
   return true;
 }
 
-bool convertPoseToRootFrame(const geometry_msgs::PoseStamped &pose_msg,
+bool convertPoseToRootFrame(const geometry_msgs::msg::PoseStamped &pose_msg,
                             KDL::Frame &pose_kdl,
                             const std::string &root_frame,
-                            tf::TransformListener& tf)
+                            tf2_ros::TransformListener& tf)
 {
-  geometry_msgs::PoseStamped pose_stamped;
+  geometry_msgs::msg::PoseStamped pose_stamped;
   if(!convertPoseToRootFrame(pose_msg, pose_stamped, root_frame,tf))
     return false;
   tf::poseMsgToKDL(pose_stamped.pose, pose_kdl);
@@ -350,13 +350,13 @@ bool convertPoseToRootFrame(const geometry_msgs::PoseStamped &pose_msg,
 }
 
 
-bool convertPoseToRootFrame(const geometry_msgs::PoseStamped &pose_msg,
-                            geometry_msgs::PoseStamped &pose_msg_out,
+bool convertPoseToRootFrame(const geometry_msgs::msg::PoseStamped &pose_msg,
+                            geometry_msgs::msg::PoseStamped &pose_msg_out,
                             const std::string &root_frame,
-                            tf::TransformListener& tf)
+                            tf2_ros::TransformListener& tf, rclcpp::Node node_handle)
 {
-  geometry_msgs::PoseStamped pose_msg_in = pose_msg;
-  ROS_DEBUG("Request:\nframe_id: %s\nPosition: %f %f %f\n:Orientation: %f %f %f %f\n",
+  geometry_msgs::msg::PoseStamped pose_msg_in = pose_msg;
+  RCLCPP_DEBUG(node_handle.get_logger(), "Request:\nframe_id: %s\nPosition: %f %f %f\n:Orientation: %f %f %f %f\n",
             pose_msg_in.header.frame_id.c_str(),
             pose_msg_in.pose.position.x,
             pose_msg_in.pose.position.y,
@@ -374,7 +374,7 @@ bool convertPoseToRootFrame(const geometry_msgs::PoseStamped &pose_msg,
     std::string err;
     if (tf.getLatestCommonTime(pose_stamped.frame_id_, root_frame, pose_stamped.stamp_, &err) != tf::NO_ERROR)
     {
-      ROS_ERROR("pr2_arm_ik:: Cannot transform from '%s' to '%s'. TF said: %s",pose_stamped.frame_id_.c_str(),root_frame.c_str(), err.c_str());
+      RCLCPP_ERROR(node_handle.get_logger(), "pr2_arm_ik:: Cannot transform from '%s' to '%s'. TF said: %s",pose_stamped.frame_id_.c_str(),root_frame.c_str(), err.c_str());
       return false;
     }
   }
@@ -384,7 +384,7 @@ bool convertPoseToRootFrame(const geometry_msgs::PoseStamped &pose_msg,
   }
   catch(...)
   {
-    ROS_ERROR("pr2_arm_ik:: Cannot transform from '%s' to '%s'",pose_stamped.frame_id_.c_str(),root_frame.c_str());
+    RCLCPP_ERROR(node_handle.get_logger(), "pr2_arm_ik:: Cannot transform from '%s' to '%s'",pose_stamped.frame_id_.c_str(),root_frame.c_str());
     return false;
   }
   tf::poseStampedTFToMsg(pose_stamped,pose_msg_out);
@@ -394,7 +394,7 @@ bool convertPoseToRootFrame(const geometry_msgs::PoseStamped &pose_msg,
 
 
 int getJointIndex(const std::string &name,
-                  const moveit_msgs::KinematicSolverInfo &chain_info)
+                  const moveit_msgs::msg::KinematicSolverInfo &chain_info)
 {
   for(unsigned int i=0; i < chain_info.joint_names.size(); i++)
   {
@@ -407,7 +407,7 @@ int getJointIndex(const std::string &name,
 }
 
 void getKDLChainInfo(const KDL::Chain &chain,
-                     moveit_msgs::KinematicSolverInfo &chain_info)
+                     moveit_msgs::msg::KinematicSolverInfo &chain_info)
 {
   int i=0; // segment number
   while(i < (int)chain.getNrOfSegments())

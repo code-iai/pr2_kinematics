@@ -52,9 +52,11 @@
 
 #include <std_msgs/msg/string.h>
 #include <moveit_msgs/msg/display_trajectory.hpp>
-#include <moveit_msgs/srv/get_position_fk.h>
-#include <moveit_msgs/srv/get_position_ik.h>
-#include <moveit_msgs/msg/kinematic_solver_info.h>
+#include <moveit_msgs/srv/get_position_fk.hpp>
+#include <moveit_msgs/srv/get_position_ik.hpp>
+#include <moveit_msgs/msg/kinematic_solver_info.hpp>
+
+#include <tinyxml.h>
 
 
 using namespace angles;
@@ -82,9 +84,7 @@ namespace pr2_arm_kinematics
                       double &soln1,
                       double &soln2);
 
-  bool loadRobotModel(rclcpp::NodeHandle node_handle,
-                      urdf::Model &robot_model,
-                      std::string &xml_string);
+  bool loadRobotModel(rclcpp::Node &node_handle, urdf::Model &robot_model, std::string &xml_string);
 
   bool getKDLChain(const std::string &xml_string,
                    const std::string &root_name,
@@ -97,43 +97,44 @@ namespace pr2_arm_kinematics
                    KDL::Tree &kdl_chain);
 
   bool checkJointNames(const std::vector<std::string> &joint_names,
-                       const moveit_msgs::KinematicSolverInfo &chain_info);
+                       const moveit_msgs::msg::KinematicSolverInfo &chain_info);
+                       //const moveit_msgs::msg::KinematicSolverInfo &chain_info);
 
   bool checkLinkNames(const std::vector<std::string> &link_names,
-                      const moveit_msgs::KinematicSolverInfo &chain_info);
+                      const moveit_msgs::msg::KinematicSolverInfo &chain_info);
 
   bool checkLinkName(const std::string &link_name,
-                     const moveit_msgs::KinematicSolverInfo &chain_info);
+                     const moveit_msgs::msg::KinematicSolverInfo &chain_info);
 
-  bool checkRobotState(moveit_msgs::RobotState &robot_state,
-                       const moveit_msgs::KinematicSolverInfo &chain_info);
+  bool checkRobotState(moveit_msgs::msg::RobotState &robot_state,
+                       const moveit_msgs::msg::KinematicSolverInfo &chain_info);
 
-  bool checkFKService(moveit_msgs::GetPositionFK::Request &request,
-                      moveit_msgs::GetPositionFK::Response &response,
-                      const moveit_msgs::KinematicSolverInfo &chain_info);
+  bool checkFKService(moveit_msgs::srv::GetPositionFK::Request &request,
+                      moveit_msgs::srv::GetPositionFK::Response &response,
+                      const moveit_msgs::msg::KinematicSolverInfo &chain_info);
 
-  bool checkIKService(moveit_msgs::GetPositionIK::Request &request,
-                      moveit_msgs::GetPositionIK::Response &response,
-                      const moveit_msgs::KinematicSolverInfo &chain_info);
+  bool checkIKService(moveit_msgs::srv::GetPositionIK::Request &request,
+                      moveit_msgs::srv::GetPositionIK::Response &response,
+                      const moveit_msgs::msg::KinematicSolverInfo &chain_info);
 
   int getJointIndex(const std::string &name,
-                    const moveit_msgs::KinematicSolverInfo &chain_info);
+                    const moveit_msgs::msg::KinematicSolverInfo &chain_info);
 
-  bool convertPoseToRootFrame(const geometry_msgs::PoseStamped &pose_msg,
+  bool convertPoseToRootFrame(const geometry_msgs::msg::PoseStamped &pose_msg,
                               KDL::Frame &pose_kdl,
                               const std::string &root_frame,
-                              tf::TransformListener& tf);
+                              tf2_ros::TransformListener& tf);
 
-  bool convertPoseToRootFrame(const geometry_msgs::PoseStamped &pose_msg,
-                              geometry_msgs::PoseStamped &pose_msg_out,
+  bool convertPoseToRootFrame(const geometry_msgs::msg::PoseStamped &pose_msg,
+                              geometry_msgs::msg::PoseStamped &pose_msg_out,
                               const std::string &root_frame,
-                              tf::TransformListener& tf);
+                              tf2_ros::TransformListener& tf);
 
   int getKDLSegmentIndex(const KDL::Chain &chain,
                          const std::string &name);
 
   void getKDLChainInfo(const KDL::Chain &chain,
-                       moveit_msgs::KinematicSolverInfo &chain_info);
+                       moveit_msgs::msg::KinematicSolverInfo &chain_info);
 }
 
 #endif// PR2_ARM_IK_UTILS_H

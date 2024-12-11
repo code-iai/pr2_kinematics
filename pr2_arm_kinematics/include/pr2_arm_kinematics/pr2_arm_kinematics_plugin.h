@@ -37,18 +37,18 @@
 #ifndef PR2_ARM_IK_NODE_H
 #define PR2_ARM_IK_NODE_H
 
-#include <ros/ros.h>
-#include <tf/tf.h>
-#include <tf/transform_listener.h>
+//#include <ros/ros.h>
+//#include <tf/tf.h>
+#include <tf2_ros/transform_listener.h>
 
 #include <angles/angles.h>
 #include <pr2_arm_kinematics/pr2_arm_ik_solver.h>
-#include <tf_conversions/tf_kdl.h>
+//#include <tf_conversions/tf_kdl.h>
 
-#include <moveit_msgs/GetPositionFK.h>
-#include <moveit_msgs/GetPositionIK.h>
-#include <moveit_msgs/KinematicSolverInfo.h>
-#include <moveit_msgs/MoveItErrorCodes.h>
+#include <moveit_msgs/srv/get_position_fk.hpp>
+#include <moveit_msgs/srv/get_position_ik.hpp>
+#include <moveit_msgs/msg/kinematic_solver_info.hpp>
+#include <moveit_msgs/msg/move_it_error_codes.hpp>
 
 #include <kdl/chainfksolverpos_recursive.hpp>
 

@@ -55,7 +55,7 @@
 
 namespace pr2_arm_kinematics
 {
-  class PR2ArmKinematics
+  class PR2ArmKinematics // : public rclcpp::Node
   {
     public:
 
@@ -84,40 +84,40 @@ namespace pr2_arm_kinematics
      * @param A request message. See service definition for GetPositionIK for more information on this message.
      * @param The response message. See service definition for GetPositionIK for more information on this message.
      */
-    virtual bool getPositionIK(moveit_msgs::GetPositionIK::Request &request,
-                               moveit_msgs::GetPositionIK::Response &response);
+    virtual bool getPositionIK(moveit_msgs::srv::GetPositionIK::Request &request,
+                               moveit_msgs::srv::GetPositionIK::Response &response);
 
     /**
      * @brief This is the basic forward kinematics service that will return information about the kinematics node.
      * @param A request message. See service definition for GetPositionFK for more information on this message.
      * @param The response message. See service definition for GetPositionFK for more information on this message.
      */
-    bool getPositionFK(moveit_msgs::GetPositionFK::Request &request,
-                       moveit_msgs::GetPositionFK::Response &response);
+    bool getPositionFK(moveit_msgs::srv::GetPositionFK::Request &request,
+                       moveit_msgs::srv::GetPositionFK::Response &response);
 
     protected:
 
     // Helper function that assumes that everything is in the correct frame
-    bool getPositionIKHelper(moveit_msgs::GetPositionIK::Request &request,
-                 moveit_msgs::GetPositionIK::Response &response);
+    bool getPositionIKHelper(moveit_msgs::srv::GetPositionIK::Request &request,
+                 moveit_msgs::srv::GetPositionIK::Response &response);
 
     virtual bool transformPose(const std::string& des_frame,
-                   const geometry_msgs::PoseStamped& pose_in,
-                   geometry_msgs::PoseStamped& pose_out);
+                   const geometry_msgs::msg::PoseStamped& pose_in,
+                   geometry_msgs::msg::PoseStamped& pose_out);
 
     bool active_;
     int free_angle_;
     urdf::Model robot_model_;
     double search_discretization_;
-    ros::NodeHandle node_handle_, root_handle_;
+    rclcpp::Node node_handle_, root_handle_;
     boost::shared_ptr<pr2_arm_kinematics::PR2ArmIKSolver> pr2_arm_ik_solver_;
-    ros::ServiceServer ik_service_,fk_service_,ik_solver_info_service_,fk_solver_info_service_;
-    tf::TransformListener* tf_;
+//    rclcpp::Service ik_service_,fk_service_,ik_solver_info_service_,fk_solver_info_service_;
+    tf2_ros::TransformListener* tf_;
     std::string root_name_;
     int dimension_;
     boost::shared_ptr<KDL::ChainFkSolverPos_recursive> jnt_to_pose_solver_;
     KDL::Chain kdl_chain_;
-    moveit_msgs::KinematicSolverInfo ik_solver_info_, fk_solver_info_;
+    moveit_msgs::msg::KinematicSolverInfo ik_solver_info_, fk_solver_info_;
   };
 }
 

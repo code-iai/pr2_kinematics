@@ -9,7 +9,7 @@
   <url type="website">http://ros.org/wiki/pr2_arm_kinematics</url>
 
   <author>Sachin Chitta</author>
-  
+
   <build_depend>rclcpp</build_depend>
   <build_depend>angles</build_depend>
   <build_depend>urdf</build_depend>

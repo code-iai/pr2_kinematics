@@ -18,15 +18,17 @@ find_package(kdl_parser REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(tinyxml REQUIRED)
 #find_package(moveit_srvs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
-
+include_directories(pr2_arm_kinematics/include)
 add_executable(pr2_arm_kinematics_node src/main.cpp)
 target_include_directories(pr2_arm_kinematics_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
+  $<INSTALL_INTERFACE:include/${PROJECT_NAME}/src>)
 target_compile_features(pr2_arm_kinematics_node PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 
 ament_target_dependencies(pr2_arm_kinematics_node
@@ -38,12 +40,42 @@ ament_target_dependencies(pr2_arm_kinematics_node
     moveit_msgs
     moveit_core
     std_msgs
-  #  moveit_srvs
+    geometry_msgs
+    tinyxml
     )
-target_link_libraries(pr2_arm_kinematics_node Eigen3::Eigen)
+
+add_library(pr2_arm_kinematics_lib
+  src/pr2_arm_ik.cpp
+  src/pr2_arm_ik_solver.cpp
+  src/pr2_arm_kinematics_utils.cpp
+  src/pr2_arm_kinematics.cpp
+  src/pr2_arm_kinematics_plugin.cpp
+)
+
+ament_target_dependencies(pr2_arm_kinematics_lib
+    rclcpp
+    tf2_ros
+    angles
+    urdf
+    kdl_parser
+    moveit_msgs
+    moveit_core
+    std_msgs
+    tinyxml
+    )
+
+
+target_include_directories(pr2_arm_kinematics_lib PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/${PROJECT_NAME}/src>)
+target_link_libraries(pr2_arm_kinematics_lib tinyxml2::tinyxml2)
 
 install(TARGETS pr2_arm_kinematics_node
   DESTINATION lib/${PROJECT_NAME})
+
+target_link_libraries(pr2_arm_kinematics_node Eigen3::Eigen)
+target_link_libraries(pr2_arm_kinematics_node pr2_arm_kinematics_lib)
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

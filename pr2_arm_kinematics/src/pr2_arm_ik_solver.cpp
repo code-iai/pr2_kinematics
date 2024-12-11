@@ -55,7 +55,7 @@ PR2ArmIKSolver::PR2ArmIKSolver(const urdf::Model &robot_model,
     active_ = true;
 }
 
-void PR2ArmIKSolver::getSolverInfo(moveit_msgs::KinematicSolverInfo &response)
+void PR2ArmIKSolver::getSolverInfo(moveit_msgs::msg::KinematicSolverInfo &response)
 {
   pr2_arm_ik_->getSolverInfo(response);
 }
@@ -226,7 +226,7 @@ int PR2ArmIKSolver::CartToJntSearch(const KDL::JntArray& q_in,
                                     const double &timeout,
                                     const double& consistency_limit)
 {
-  moveit_msgs::MoveItErrorCodes error_code;
+  moveit_msgs::msg::MoveItErrorCodes error_code;
   static kinematics::KinematicsBase::IKCallbackFn solution_callback = 0;
   return CartToJntSearch(q_in, p_in, q_out, timeout, true, consistency_limit, error_code, solution_callback);
 }
@@ -235,7 +235,7 @@ int PR2ArmIKSolver::CartToJntSearch(const KDL::JntArray& q_in,
                                      const KDL::Frame& p_in,
                                      KDL::JntArray &q_out,
                                      const double &timeout,
-                                     moveit_msgs::MoveItErrorCodes &error_code,
+                                     moveit_msgs::msg::MoveItErrorCodes &error_code,
                                      const kinematics::KinematicsBase::IKCallbackFn &solution_callback)
 {
   return CartToJntSearch(q_in, p_in, q_out, timeout, false, 0.0, error_code, solution_callback);
@@ -247,7 +247,7 @@ int PR2ArmIKSolver::CartToJntSearch(const KDL::JntArray& q_in,
                                     KDL::JntArray &q_out,
                                     const double &timeout,
                                     const double& consistency_limit,
-                                    moveit_msgs::MoveItErrorCodes &error_code,
+                                    moveit_msgs::msg::MoveItErrorCodes &error_code,
                                     const kinematics::KinematicsBase::IKCallbackFn &solution_callback)
 {
   return CartToJntSearch(q_in, p_in, q_out, timeout, true, consistency_limit, error_code, solution_callback);
@@ -259,7 +259,7 @@ int PR2ArmIKSolver::CartToJntSearch(const KDL::JntArray& q_in,
                                     const double &timeout,
                                     bool use_consistency_limit,
                                     const double &max_consistency,
-                                    moveit_msgs::MoveItErrorCodes &error_code,
+                                    moveit_msgs::msg::MoveItErrorCodes &error_code,
                                     const kinematics::KinematicsBase::IKCallbackFn &solution_callback)
 {
   KDL::JntArray q_init = q_in;
@@ -300,7 +300,7 @@ int PR2ArmIKSolver::CartToJntSearch(const KDL::JntArray& q_in,
   ROS_DEBUG("positive increments, negative increments: %d %d", num_positive_increments, num_negative_increments);
 
   unsigned int testnum = 0;
-  geometry_msgs::Pose ik_pose_msg;
+  geometry_msgs::msg::Pose ik_pose_msg;
   tf::poseKDLToMsg(p_in, ik_pose_msg);
 
   ros::WallTime s = ros::WallTime::now();

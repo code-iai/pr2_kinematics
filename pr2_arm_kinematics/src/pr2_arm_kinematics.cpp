@@ -35,10 +35,10 @@
 /* Author: Sachin Chitta */
 
 #include <pr2_arm_kinematics/pr2_arm_kinematics.h>
-#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/msg/pose_stamped.hpp>
 #include <kdl_parser/kdl_parser.hpp>
-#include <tf_conversions/tf_kdl.h>
-#include "ros/ros.h"
+//#include <tf_conversions/tf_kdl.h>
+//#include "ros/ros.h"
 #include <algorithm>
 #include <numeric>
 
@@ -46,7 +46,7 @@
 using namespace KDL;
 using namespace tf;
 using namespace std;
-using namespace ros;
+//using namespace ros;
 
 namespace pr2_arm_kinematics {
 
@@ -62,24 +62,24 @@ PR2ArmKinematics::PR2ArmKinematics(bool create_tf_listener):  node_handle_("~"),
 
   while(!loadRobotModel(node_handle_,robot_model, xml_string) && node_handle_.ok())
   {
-    ROS_ERROR("Could not load robot model. Are you sure the robot model is on the parameter server?");
+    RCLCPP_ERROR(this->node_handle_.get_logger(), "Could not load robot model. Are you sure the robot model is on the parameter server?");
     ros::Duration(0.5).sleep();
   }
 
   if (!node_handle_.getParam("root_name", root_name_)){
-    ROS_FATAL("PR2IK: No root name found on parameter server");
+    RCLCPP_FATAL(this->node_handle_.get_logger(), "PR2IK: No root name found on parameter server");
     exit(-1);
   }
   if (!node_handle_.getParam("tip_name", tip_name)){
-    ROS_FATAL("PR2IK: No tip name found on parameter server");
+    RCLCPP_FATAL(this->node_handle_.get_logger(), "PR2IK: No tip name found on parameter server");
     exit(-1);
   }
 
-  ROS_DEBUG("Loading KDL Tree");
+  RCLCPP_DEBUG(this->node_handle_.get_logger(), "Loading KDL Tree");
   if(!getKDLChain(xml_string,root_name_,tip_name,kdl_chain_))
   {
     active_ = false;
-    ROS_ERROR("Could not load kdl tree");
+    RCLCPP_ERROR(this->node_handle_.get_logger(), "Could not load kdl tree");
   }
   if(create_tf_listener) {
     tf_ = new TransformListener();
@@ -87,7 +87,7 @@ PR2ArmKinematics::PR2ArmKinematics(bool create_tf_listener):  node_handle_("~"),
     tf_ = NULL;
   }
 
-  ROS_DEBUG("Advertising services");
+  ROS_DEBUG(this->node_handle_.get_logger(), "Advertising services");
   jnt_to_pose_solver_.reset(new KDL::ChainFkSolverPos_recursive(kdl_chain_));
   node_handle_.param<int>("free_angle",free_angle_,2);
 
@@ -95,7 +95,7 @@ PR2ArmKinematics::PR2ArmKinematics(bool create_tf_listener):  node_handle_("~"),
   pr2_arm_ik_solver_.reset(new pr2_arm_kinematics::PR2ArmIKSolver(robot_model,root_name_,tip_name, search_discretization_,free_angle_));
   if(!pr2_arm_ik_solver_->active_)
   {
-    ROS_ERROR("Could not load ik");
+    RCLCPP_ERROR(this->node_handle_.get_logger(), "Could not load ik");
     active_ = false;
   }
   else
@@ -107,20 +107,21 @@ PR2ArmKinematics::PR2ArmKinematics(bool create_tf_listener):  node_handle_("~"),
 
     for(unsigned int i=0; i < ik_solver_info_.joint_names.size(); i++)
     {
-      ROS_DEBUG("PR2Kinematics:: joint name: %s",ik_solver_info_.joint_names[i].c_str());
+      RCLCPP_DEBUG("this->node_handle_.get_logger(), PR2Kinematics:: joint name: %s",ik_solver_info_.joint_names[i].c_str());
     }
     for(unsigned int i=0; i < ik_solver_info_.link_names.size(); i++)
     {
-      ROS_DEBUG("PR2Kinematics can solve IK for %s",ik_solver_info_.link_names[i].c_str());
+      RCLCPP_DEBUG(this->node_handle_.get_logger(), "PR2Kinematics can solve IK for %s",ik_solver_info_.link_names[i].c_str());
     }
     for(unsigned int i=0; i < fk_solver_info_.link_names.size(); i++)
     {
-      ROS_DEBUG("PR2Kinematics can solve FK for %s",fk_solver_info_.link_names[i].c_str());
+      RCLCPP_DEBUG(this->node_handle_.get_logger(), "PR2Kinematics can solve FK for %s",fk_solver_info_.link_names[i].c_str());
     }
-    ROS_DEBUG("PR2Kinematics::active");
+    RCLCPP_DEBUG(this->node_handle_.get_logger(), "PR2Kinematics::active");
     active_ = true;
-    fk_service_ = node_handle_.advertiseService(FK_SERVICE,&PR2ArmKinematics::getPositionFK,this);
-    ik_service_ = node_handle_.advertiseService(IK_SERVICE,&PR2ArmKinematics::getPositionIK,this);
+    fk_service_ = this->create_service<moveit_msgs::srv::GetPositionFK>("get_fk", &PR2ArmKinematics::getPositionFK);
+//    fk_service_ = node_handle_.advertiseService(FK_SERVICE,&PR2ArmKinematics::getPositionFK,this);
+//    ik_service_ = node_handle_.advertiseService(IK_SERVICE,&PR2ArmKinematics::getPositionIK,this);
 
   }
 }
@@ -139,20 +140,20 @@ bool PR2ArmKinematics::isActive()
   return false;
 }
 
-bool PR2ArmKinematics::getPositionIK(moveit_msgs::GetPositionIK::Request &request,
-                                     moveit_msgs::GetPositionIK::Response &response)
+bool PR2ArmKinematics::getPositionIK(moveit_msgs::srv::GetPositionIK::Request &request,
+                                     moveit_msgs::srv::GetPositionIK::Response &response)
 {
   if(!active_)
   {
-    ROS_ERROR("IK service not active");
+    RCLCPP_ERROR(this->node_handle_.get_logger(), "IK service not active");
     return false;
   }
 
   if(!checkIKService(request,response,ik_solver_info_))
     return false;
 
-  geometry_msgs::PoseStamped pose_msg_in = request.ik_request.pose_stamped;
-  geometry_msgs::PoseStamped pose_msg_out;
+  geometry_msgs::msg:;PoseStamped pose_msg_in = request.ik_request.pose_stamped;
+  geometry_msgs::msg::PoseStamped pose_msg_out;
   if(tf_ != NULL) {
     if(!convertPoseToRootFrame(pose_msg_in,pose_msg_out,root_name_, *tf_))
     {
@@ -160,7 +161,7 @@ bool PR2ArmKinematics::getPositionIK(moveit_msgs::GetPositionIK::Request &reques
       return true;
     }
   } else {
-    ROS_WARN_STREAM("No tf listener.  Can't transform anything");
+    RCLCPP_WARN_STREAM(this->node_handle_.get_logger(), "No tf listener.  Can't transform anything");
     response.error_code.val = response.error_code.FRAME_TRANSFORM_FAILURE;
     return false;
   }
@@ -169,8 +170,8 @@ bool PR2ArmKinematics::getPositionIK(moveit_msgs::GetPositionIK::Request &reques
 }
 
 //this assumes that everything has been checked and is in the correct frame
-bool PR2ArmKinematics::getPositionIKHelper(moveit_msgs::GetPositionIK::Request &request,
-                                           moveit_msgs::GetPositionIK::Response &response)
+bool PR2ArmKinematics::getPositionIKHelper(moveit_msgs::srv::GetPositionIK::Request &request,
+                                           moveit_msgs::srv::GetPositionIK::Response &response)
 {
   KDL::Frame pose_desired;
   tf::poseMsgToKDL(request.ik_request.pose_stamped.pose, pose_desired);
@@ -188,7 +189,7 @@ bool PR2ArmKinematics::getPositionIKHelper(moveit_msgs::GetPositionIK::Request &
     }
     else
     {
-      ROS_ERROR("i: %d, No joint index for %s",i,request.ik_request.robot_state.joint_state.name[i].c_str());
+      RCLCPP_ERROR(this->node_handle_.get_logger(), "i: %d, No joint index for %s",i,request.ik_request.robot_state.joint_state.name[i].c_str());
     }
   }
 
@@ -212,24 +213,24 @@ bool PR2ArmKinematics::getPositionIKHelper(moveit_msgs::GetPositionIK::Request &
     for(int i=0; i < dimension_; i++)
     {
       response.solution.joint_state.position[i] = jnt_array[0](i);
-      ROS_DEBUG("IK Solution: %s %d: %f",response.solution.joint_state.name[i].c_str(),i,jnt_array[0](i));
+      RCLCPP_DEBUG(this->node_handle_.get_logger(), "IK Solution: %s %d: %f",response.solution.joint_state.name[i].c_str(),i,jnt_array[0](i));
     }
     response.error_code.val = response.error_code.SUCCESS;
     return true;
   }
   else
   {
-    ROS_DEBUG("An IK solution could not be found");
+    RCLCPP_DEBUG(this->node_handle_.get_logger(), "An IK solution could not be found");
     return false;
   }
 }
 
-bool PR2ArmKinematics::getPositionFK(moveit_msgs::GetPositionFK::Request &request,
-                                     moveit_msgs::GetPositionFK::Response &response)
+bool PR2ArmKinematics::getPositionFK(moveit_msgs::srv::GetPositionFK::Request &request,
+                                     moveit_msgs::srv::GetPositionFK::Response &response)
 {
   if(!active_)
   {
-    ROS_ERROR("FK service not active");
+    RCLCPP_ERROR(this->node_handle_.get_logger(), "FK service not active");
     return false;
   }
 
@@ -238,7 +239,7 @@ bool PR2ArmKinematics::getPositionFK(moveit_msgs::GetPositionFK::Request &reques
 
   KDL::Frame p_out;
   KDL::JntArray jnt_pos_in;
-  geometry_msgs::PoseStamped pose;
+  geometry_msgs::msg::PoseStamped pose;
   tf::Stamped<tf::Pose> tf_pose;
 
   jnt_pos_in.resize(dimension_);
@@ -254,8 +255,8 @@ bool PR2ArmKinematics::getPositionFK(moveit_msgs::GetPositionFK::Request &reques
 
   for(unsigned int i=0; i < request.fk_link_names.size(); i++)
   {
-    ROS_DEBUG("End effector index: %d",pr2_arm_kinematics::getKDLSegmentIndex(kdl_chain_,request.fk_link_names[i]));
-    ROS_DEBUG("Chain indices: %d",kdl_chain_.getNrOfSegments());
+    RCLCPP_DEBUG(this->node_handle_.get_logger(), "End effector index: %d",pr2_arm_kinematics::getKDLSegmentIndex(kdl_chain_,request.fk_link_names[i]));
+    RCLCPP_DEBUG(this->node_handle_.get_logger(), "Chain indices: %d",kdl_chain_.getNrOfSegments());
     if(jnt_to_pose_solver_->JntToCart(jnt_pos_in,p_out,pr2_arm_kinematics::getKDLSegmentIndex(kdl_chain_,request.fk_link_names[i])) >=0)
     {
       tf_pose.frame_id_ = root_name_;
@@ -271,7 +272,7 @@ bool PR2ArmKinematics::getPositionFK(moveit_msgs::GetPositionFK::Request &reques
     }
     else
     {
-      ROS_ERROR("Could not compute FK for %s",request.fk_link_names[i].c_str());
+      RCLCPP_ERROR(this->node_handle_.get_logger(), "Could not compute FK for %s",request.fk_link_names[i].c_str());
       response.error_code.val = response.error_code.NO_IK_SOLUTION;
       return false;
     }
@@ -279,19 +280,19 @@ bool PR2ArmKinematics::getPositionFK(moveit_msgs::GetPositionFK::Request &reques
   return true;
 }
 bool PR2ArmKinematics::transformPose(const std::string& des_frame,
-                                     const geometry_msgs::PoseStamped& pose_in,
-                                     geometry_msgs::PoseStamped& pose_out)
+                                     const geometry_msgs::msg::PoseStamped& pose_in,
+                                     geometry_msgs::msg::PoseStamped& pose_out)
 {
   if(tf_ != NULL) {
     try {
       tf_->transformPose(des_frame,pose_in,pose_out);
     }
     catch(...) {
-      ROS_ERROR("Could not transform FK pose to frame: %s",des_frame.c_str());
+      RCLCPP_ERROR(this->node_handle_.get_logger(), "Could not transform FK pose to frame: %s",des_frame.c_str());
       return false;
     }
   } else if(des_frame != root_name_){
-    ROS_WARN_STREAM("No tf listener, can't transform to frame " << des_frame);
+    RCLCPP_WARN_STREAM(this->node_handle_.get_logger(), "No tf listener, can't transform to frame " << des_frame);
     return false;
   }
   return true;

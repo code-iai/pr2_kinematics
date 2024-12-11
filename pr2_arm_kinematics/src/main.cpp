@@ -38,17 +38,22 @@
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "pr2_arm_kinematics");
-  pr2_arm_kinematics::PR2ArmKinematics pr2_arm_kinematics;
+    rclcpp::init(argc, argv);
+    std::shared_ptr<rclcpp::Node> node = rclcpp::Node::make_shared("pr2_arm_kinematics");
+    pr2_arm_kinematics::PR2ArmKinematics pr2_arm_kinematics;
+    rclcpp::spin(node);
+    rclcpp::shutdown();
+//  ros::init(argc, argv, "pr2_arm_kinematics");
+//  pr2_arm_kinematics::PR2ArmKinematics pr2_arm_kinematics;
 
-  if(!pr2_arm_kinematics.isActive())
-  {
-    ROS_ERROR("pr2_arm_kinematics could not be activated");
-  }
-  else
-  {
-    ROS_INFO("pr2_arm_kinematics active");
-    ros::spin();
-  }
+//  if(!pr2_arm_kinematics.isActive())
+//  {
+//    ROS_ERROR("pr2_arm_kinematics could not be activated");
+//  }
+//  else
+//  {
+//    ROS_INFO("pr2_arm_kinematics active");
+//    ros::spin();
+//  }
   return(0);
 }

@@ -89,18 +89,18 @@ public:
      @brief get chain information about the arm. This populates the IK query response, filling in joint level information including names and joint limits.
      @param The response structure to be filled in.
   */
-  void getSolverInfo(moveit_msgs::KinematicSolverInfo &info);
+  void getSolverInfo(moveit_msgs::msg::KinematicSolverInfo &info);
 
   /**
      @brief get chain information about the arm.
   */
-  moveit_msgs::KinematicSolverInfo solver_info_;
+  moveit_msgs::msg::KinematicSolverInfo solver_info_;
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   private:
 
-  void addJointToChainInfo(urdf::JointConstSharedPtr joint,moveit_msgs::KinematicSolverInfo &info);
+  void addJointToChainInfo(urdf::JointConstSharedPtr joint,moveit_msgs::msg::KinematicSolverInfo &info);
 
   bool checkJointLimits(const std::vector<double> &joint_values) const;
 

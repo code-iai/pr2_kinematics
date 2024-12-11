@@ -185,7 +185,7 @@ static const int TIMED_OUT = -2;
                         const KDL::Frame& p_in,
                         KDL::JntArray &q_out,
                         const double &timeout,
-                        moveit_msgs::MoveItErrorCodes &error_code,
+                        moveit_msgs::msg::MoveItErrorCodes &error_code,
                         const kinematics::KinematicsBase::IKCallbackFn &solution_callback);
 
      /**
@@ -207,7 +207,7 @@ static const int TIMED_OUT = -2;
                         KDL::JntArray &q_out,
                         const double &timeout,
                         const double& consistency_limit,
-                        moveit_msgs::MoveItErrorCodes &error_code,
+                        moveit_msgs::msg::MoveItErrorCodes &error_code,
                         const kinematics::KinematicsBase::IKCallbackFn &solution_callback);
 
     /**
@@ -215,7 +215,7 @@ static const int TIMED_OUT = -2;
      * @param response This class gets populated with information about the joints
      * that IK operates on, including joint names and limits.
     */
-    void getSolverInfo(moveit_msgs::KinematicSolverInfo &response);
+    void getSolverInfo(moveit_msgs::msg::KinematicSolverInfo &response);
 
     std::string getFrameId();
 
@@ -250,7 +250,7 @@ static const int TIMED_OUT = -2;
                         const double &timeout,
                         bool use_consistency_limit,
                         const double& consistency_limit,
-                        moveit_msgs::MoveItErrorCodes &error_code,
+                        moveit_msgs::msg::MoveItErrorCodes &error_code,
                         const kinematics::KinematicsBase::IKCallbackFn &solution_callback);
 
     bool getCount(int &count, const int &max_count, const int &min_count);
